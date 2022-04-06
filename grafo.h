@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+
 //------------------------------------------------------------------------------
 // (apontador para) estrutura de dados para representar um grafo
 // 
@@ -59,5 +60,9 @@ vertice le_vertice(void);
 
 double coeficiente_proximidade(grafo g, vertice v);
 
+
 //------------------------------------------------------------------------------
+// remove espaços brancos de uma string
+void removeSpaces(char *str);
+
 #endif

@@ -1,4 +1,8 @@
+#define  _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <string.h>
 #include "grafo.h"
 
 //------------------------------------------------------------------------------
@@ -27,6 +31,7 @@ int destroi_grafo(grafo g) {
   return g == NULL;
 }
 
+
 //------------------------------------------------------------------------------
 // lê um grafo
 // 
@@ -35,6 +40,32 @@ int destroi_grafo(grafo g) {
 //         NULL, em caso de erro 
 
 grafo le_grafo(FILE *input) {
+  char * line = NULL;
+  char line_aux[3];
+  size_t len = 0;
+  ssize_t read;
+  int lines = 0;
+
+  if (input == NULL)
+      exit(EXIT_FAILURE);
+
+  while ((read = getline(&line, &len, input)) != EOF) {
+    if (!(read == 1 && line[0] == '\n')){
+      removeSpaces(line);
+      strcpy(line_aux, line);
+      printf("%s\n", line_aux);
+      lines++;
+      /*
+      TODO: para cada linha, ver se o vertice ta no grafo, se tiver, adiciona na lista de arestas 
+      se nao tiver, cria vertice */
+    }
+  }
+
+  fclose(input);
+  if (line)
+      free(line);
+
+  printf("\n\n%d\n", lines);
 
   return (grafo)input;
 }
@@ -44,7 +75,6 @@ grafo le_grafo(FILE *input) {
 // lê um vertice 
 
 vertice le_vertice(void) {
-
   return (vertice) NULL;
 }
 
@@ -61,5 +91,17 @@ double coeficiente_proximidade(grafo g, vertice v) {
   g = NULL;
 
   return !(v == (vertice) g);
+}
+
+//------------------------------------------------------------------------------
+// remove espaços brancos de uma string
+void removeSpaces(char *str)
+{
+    int count = 0;
+    for (int i = 0; str[i]; i++)
+        if ( (str[i] != '\0') && (str[i] != '\n') && (str[i] != '\t') && (str[i] != ' ') ) 
+            str[count++] = str[i]; 
+            
+    str[count] = '\0';
 }
 
