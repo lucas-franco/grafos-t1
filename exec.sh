@@ -6,7 +6,7 @@ if [ $? -eq 0 ] ; then
   do
     echo "\n"
     echo "Lendo arquivo: $f"
-    ./teste < $f
+    ./teste $f
     echo "\n"
   done
 else 

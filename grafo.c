@@ -39,33 +39,37 @@ int destroi_grafo(grafo g) {
 //         ou 
 //         NULL, em caso de erro 
 
-grafo le_grafo(FILE *input) {
+grafo le_grafo(char * filename) {
+  char fileToArray[1024][1024];
   char * line = NULL;
   char line_aux[3];
   size_t len = 0;
   ssize_t read;
   int lines = 0;
+  int whitespaces = 0;
 
+  FILE *input = fopen(filename, "r");
   if (input == NULL)
       exit(EXIT_FAILURE);
 
   while ((read = getline(&line, &len, input)) != EOF) {
     if (!(read == 1 && line[0] == '\n')){
-      removeSpaces(line);
+      // whitespaces = removeSpaces(line);
+      separateString(line);
       strcpy(line_aux, line);
-      printf("%s\n", line_aux);
       lines++;
+      // printf("%s whitespaces: %d\n", line, whitespaces);
       /*
       TODO: para cada linha, ver se o vertice ta no grafo, se tiver, adiciona na lista de arestas 
       se nao tiver, cria vertice */
     }
   }
 
+  printf("\n\nLINHAS: %d\n", lines);
+
   fclose(input);
   if (line)
       free(line);
-
-  printf("\n\n%d\n", lines);
 
   return (grafo)input;
 }
@@ -95,13 +99,49 @@ double coeficiente_proximidade(grafo g, vertice v) {
 
 //------------------------------------------------------------------------------
 // remove espaços brancos de uma string
-void removeSpaces(char *str)
+int removeSpaces(char *str)
 {
     int count = 0;
+    int whitespaces = 0;
     for (int i = 0; str[i]; i++)
         if ( (str[i] != '\0') && (str[i] != '\n') && (str[i] != '\t') && (str[i] != ' ') ) 
-            str[count++] = str[i]; 
-            
+          str[count++] = str[i];
+        else
+          whitespaces++;
     str[count] = '\0';
+    return whitespaces;
 }
 
+int separateString(char *str){
+  char ** res  = NULL;
+  char delimit[]=" \t\r\n\v\f";
+  char *  p    = strtok (str, delimit);
+  int n_spaces = 0, i;
+
+  /* split string and append tokens to 'res' */
+  while (p) {
+    res = realloc (res, sizeof (char*) * ++n_spaces);
+
+    if (res == NULL)
+      exit (-1); /* memory allocation failed */
+
+    res[n_spaces-1] = p;
+
+    p = strtok (NULL, delimit);
+  }
+
+  /* realloc one extra element for the last NULL */
+
+  // res = realloc (res, sizeof (char*) * (n_spaces+1));
+  // res[n_spaces] = 0;
+
+  /* print the result */
+
+  for (i = 0; i < (n_spaces); ++i)
+    printf ("res[%d] = %s\n", i, res[i]);
+
+  /* free the memory allocated */
+
+  free (res);
+  return res;
+  }

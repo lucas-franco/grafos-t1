@@ -35,7 +35,7 @@ int destroi_grafo(grafo g);
 // devolve o grafo lido. Caso o arquivo esteja mal formado o
 // comportamento da função é indefinido
 
-grafo le_grafo(FILE *input);  
+grafo le_grafo(char * filename);
 
 
 
@@ -63,6 +63,8 @@ double coeficiente_proximidade(grafo g, vertice v);
 
 //------------------------------------------------------------------------------
 // remove espaços brancos de uma string
-void removeSpaces(char *str);
+int removeSpaces(char *str);
+
+int separateString(char *str);
 
 #endif
