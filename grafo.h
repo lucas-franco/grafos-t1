@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+
 //------------------------------------------------------------------------------
 // (apontador para) estrutura de dados para representar um grafo
 // 
@@ -34,7 +35,7 @@ int destroi_grafo(grafo g);
 // devolve o grafo lido. Caso o arquivo esteja mal formado o
 // comportamento da função é indefinido
 
-grafo le_grafo(FILE *input);  
+grafo le_grafo(FILE *input);
 
 
 
@@ -59,5 +60,11 @@ vertice le_vertice(void);
 
 double coeficiente_proximidade(grafo g, vertice v);
 
+
 //------------------------------------------------------------------------------
+// remove espaços brancos de uma string
+int removeSpaces(char *str);
+
+int separateString(char *str);
+
 #endif
