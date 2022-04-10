@@ -16,7 +16,6 @@ int main(int argc, char **argv) {
 	}
 
 	v = le_vertice();
-
 	if ( !g )
 		return 1;
 

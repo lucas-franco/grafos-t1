@@ -73,6 +73,7 @@ vertice cria_vertice(char *nome)
 	v->vertices_conectados = malloc(sizeof(struct node));
 
 	ultimo_id_vertice += 1;
+    // printf("cria vértice: %s\n", v->nome);
 	return v;
 }
 
@@ -215,7 +216,7 @@ grafo le_grafo(FILE *input) {
 
 	int linesCount = 0;
 
-	char delimit[]=" \t\r\n\v\f";
+	char delimit[]=" \t\r\n\v\f\0";
 
 	char *u_nome;
 	char *v_nome;
@@ -223,16 +224,24 @@ grafo le_grafo(FILE *input) {
 	vertice u;
 	vertice v;
 
+  long unsigned int i = 0;
+
 	if (input == NULL)
 		exit(EXIT_FAILURE);
 
 	while ((read = getline(&line, &len, input)) != EOF) {
-		if (!(read == 1 && line[0] == '\n')){
+		if (!(read == 1 && line[0] == '\n')) {
+
+            // Fix para não ler espaço em branco
+            i = strlen(line) - 1;
+            if (line[i] == '\n')
+                line[i] = '\0';
+
 			char * separatedString = strtok(line, delimit);
 			linesCount++;
 
-			while (separatedString != NULL) {
-				// printf("%s ", separatedString);
+			while (separatedString != NULL && separatedString[0] != '\0') {
+				// printf("%s\n", separatedString);
 
 				int tokens_read = 0;
 
@@ -274,8 +283,11 @@ grafo le_grafo(FILE *input) {
 // lê um vertice 
 
 vertice le_vertice(void) {
-	// TODO: le nome do vertice usando stdin e retorna o vertice
-	return (vertice) NULL;
+    char nome[LINE_SIZE];
+    printf("Digite o nome do vértice v: ");
+    scanf("%s", nome);
+	vertice v = cria_vertice(nome);
+	return v;
 }
 
 
@@ -286,6 +298,10 @@ vertice le_vertice(void) {
 // 
 
 double coeficiente_proximidade(grafo g, vertice v) {
+    if (vertice_existe(g, v->nome) == NULL) {
+        printf("Vértice %s não existe no grafo.\n", v->nome);
+        return 0;
+    }
 	distancia_de_v(g, v);
 	unsigned long int soma_de_distancia = 0;
 	unsigned long int n = g->num_vertices;
