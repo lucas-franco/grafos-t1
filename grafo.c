@@ -41,6 +41,14 @@ typedef struct node
 	struct node *prox;
 } node;
 
+// A structure to represent a queue
+struct queue {
+		int front, rear;
+		int size;
+		unsigned int capacity;
+		int *components;
+};
+
 
 /****************************** Funções adicionais *********************************/
 grafo cria_grafo(void);
@@ -73,7 +81,7 @@ vertice cria_vertice(char *nome)
 	v->vertices_conectados = malloc(sizeof(struct node));
 
 	ultimo_id_vertice += 1;
-    // printf("cria vértice: %s\n", v->nome);
+		// printf("cria vértice: %s\n", v->nome);
 	return v;
 }
 
@@ -131,12 +139,12 @@ vertice vertice_existe(grafo g, char *nome_vertice)
 	struct node *vertice_atual = g->vertices;
 
 	if (g->vertices == NULL)
-	  return NULL;
+		return NULL;
 
 	do
 	{
 		if (strcmp(vertice_atual->vertice->nome, nome_vertice) == 0) {
-		  return vertice_atual->vertice;
+			return vertice_atual->vertice;
 		}
 		vertice_atual = vertice_atual->prox;
 	} while (vertice_atual != NULL);
@@ -159,26 +167,26 @@ int cria_aresta(vertice u, vertice v)
 
 int conecta_vertices(vertice v, vertice u) 
 {
-  struct node *vizinho_u = malloc(sizeof(struct node));
-  if (u->grau > 0)
-  {
-	  struct node *primeiro_vizinho_u = u->vertices_conectados;
-	  vizinho_u->prox = primeiro_vizinho_u;
-	  primeiro_vizinho_u->anterior = vizinho_u;
-  }
-  else
-  {
-	  vizinho_u->prox = NULL;
-  }
+	struct node *vizinho_u = malloc(sizeof(struct node));
+	if (u->grau > 0)
+	{
+		struct node *primeiro_vizinho_u = u->vertices_conectados;
+		vizinho_u->prox = primeiro_vizinho_u;
+		primeiro_vizinho_u->anterior = vizinho_u;
+	}
+	else
+	{
+		vizinho_u->prox = NULL;
+	}
 
-  vizinho_u->anterior = NULL;
-  vizinho_u->vertice = v;
+	vizinho_u->anterior = NULL;
+	vizinho_u->vertice = v;
 
-  u->vertices_conectados = vizinho_u;
+	u->vertices_conectados = vizinho_u;
 
-  u->grau += 1;
+	u->grau += 1;
 
-  return 0;
+	return 0;
 }
 
 
@@ -194,9 +202,9 @@ int conecta_vertices(vertice v, vertice u)
 //         0, caso contrário
 
 int destroi_grafo(grafo g) {
-  free(g->vertices);
-  free(g);
-  return g == NULL;
+	free(g->vertices);
+	free(g);
+	return g == NULL;
 }
 
 
@@ -224,7 +232,7 @@ grafo le_grafo(FILE *input) {
 	vertice u;
 	vertice v;
 
-  long unsigned int i = 0;
+	long unsigned int i = 0;
 
 	if (input == NULL)
 		exit(EXIT_FAILURE);
@@ -232,10 +240,10 @@ grafo le_grafo(FILE *input) {
 	while ((read = getline(&line, &len, input)) != EOF) {
 		if (!(read == 1 && line[0] == '\n')) {
 
-            // Fix para não ler espaço em branco
-            i = strlen(line) - 1;
-            if (line[i] == '\n')
-                line[i] = '\0';
+						// Fix para não ler espaço em branco
+						i = strlen(line) - 1;
+						if (line[i] == '\n')
+								line[i] = '\0';
 
 			char * separatedString = strtok(line, delimit);
 			linesCount++;
@@ -283,9 +291,9 @@ grafo le_grafo(FILE *input) {
 // lê um vertice 
 
 vertice le_vertice(void) {
-    char nome[LINE_SIZE];
-    printf("Digite o nome do vértice v: ");
-    scanf("%s", nome);
+		char nome[LINE_SIZE];
+		printf("Digite o nome do vértice v: ");
+		scanf("%s", nome);
 	vertice v = cria_vertice(nome);
 	return v;
 }
@@ -298,10 +306,10 @@ vertice le_vertice(void) {
 // 
 
 double coeficiente_proximidade(grafo g, vertice v) {
-    if (vertice_existe(g, v->nome) == NULL) {
-        printf("Vértice %s não existe no grafo.\n", v->nome);
-        return 0;
-    }
+		if (vertice_existe(g, v->nome) == NULL) {
+				printf("Vértice %s não existe no grafo.\n", v->nome);
+				return 0;
+		}
 	distancia_de_v(g, v);
 	unsigned long int soma_de_distancia = 0;
 	unsigned long int n = g->num_vertices;
@@ -321,5 +329,82 @@ double coeficiente_proximidade(grafo g, vertice v) {
 
 void distancia_de_v(grafo g, vertice v) {
 	g->vertices->vertice->distancia = 1; // REMOVER
-  // BuscaLargura(G, v); // TODO
+	// BuscaLargura(G, v); // TODO
+
+	struct queue* fila = criaFila(g->num_vertices);
+	// v.pai = NULL
+	v->distancia = 0;
+	// v->estado = 1;
+	// coloca v com estado 1
+	enfileira(fila, v);
+
+	// enquanto a fila nao estiver vazia
+	while (!isEmpty(fila)) {
+		desemfileira(fila);
+	// 	para cada vizinho w de v:
+	// 		se estado de w for 1:
+	// 			processa vw -> aresta fora da arvore
+	// 		senao, se estado de w for 0
+	// 			processa w = w.pai.distancia+1
+	// 			processa vw -> aresta da arvore
+	// 			w.pai = v
+	// 			enfileira w
+	// 			w.estado = 1
+	// 	v.estado = 2
+	}
+}
+
+struct queue* criaFila (unsigned int capacity)
+{
+		struct queue* queue = (struct queue*) malloc(sizeof(struct queue));
+		queue->capacity = capacity;
+		queue->front = queue->size = 0;
+		queue->rear = capacity - 1;
+		queue->components = (int*) malloc(queue->capacity * sizeof(int));
+		return queue;
+}
+
+int isFull (struct queue* queue)
+{
+		return (queue->size == queue->capacity);
+}
+
+int isEmpty (struct queue* queue)
+{
+		return (queue->size == 0);
+}
+
+void enfileira (struct queue* queue, int item)
+{
+		if (isFull(queue))
+				return;
+
+		queue->rear = (queue->rear + 1) % queue->capacity;
+		queue->components[queue->rear] = item;
+		queue->size = queue->size + 1;;
+}
+
+int desemfileira (struct queue* queue)
+{
+		if (isEmpty(queue))
+				return -1;
+
+		int item = queue->components[queue->front];
+		queue->front = (queue->front + 1) % queue->capacity;
+		queue->size = queue->size - 1;
+		return item;
+}
+
+int rear(struct queue* queue)
+{
+		if (isEmpty(queue))
+				return -1;
+		return queue->components[queue->rear];
+}
+
+int front(struct queue* queue)
+{
+		if (isEmpty(queue))
+				return -1;
+		return queue->components[queue->front];
 }
