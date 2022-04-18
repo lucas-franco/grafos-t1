@@ -33,7 +33,9 @@ struct vertice
 	unsigned long int id;
 	unsigned long int grau;
 	unsigned long int distancia;
+	unsigned long int estado;
 	struct node *vertices_conectados;
+	vertice *pai;
 };
 
 typedef struct node
@@ -43,13 +45,12 @@ typedef struct node
 	struct node *prox;
 } node;
 
-// A structure to represent a queue
 struct queue
 {
-	int front, rear;
-	int size;
-	unsigned int capacity;
-	int *components;
+	unsigned long int front, rear;
+	unsigned long int size;
+	unsigned long int capacity;
+	vertice *components;
 };
 
 /****************************** Funções adicionais *********************************/
@@ -61,6 +62,15 @@ vertice vertice_existe(grafo g, char *nome_vertice);
 int cria_aresta(vertice v, vertice u);
 int conecta_vertices(vertice v, vertice u);
 void distancia_de_v(grafo g, vertice v);
+
+struct queue *criaFila(unsigned long int capacity);
+int isFull(struct queue *queue);
+int isEmpty(struct queue *queue);
+void enfileira(struct queue *queue, vertice item);
+vertice desemfileira(struct queue *queue);
+vertice rear(struct queue *queue);
+vertice front(struct queue *queue);
+vertice copiaVertice(const char *nome, vertice origem);
 
 grafo cria_grafo(void)
 {
@@ -80,6 +90,8 @@ vertice cria_vertice(char *nome)
 	v->id = ultimo_id_vertice;
 	v->distancia = 0;
 	v->grau = 0;
+	v->estado = 0;
+	v->pai = NULL;
 	v->vertices_conectados = malloc(sizeof(struct node));
 
 	ultimo_id_vertice += 1;
@@ -330,38 +342,66 @@ void distancia_de_v(grafo g, vertice v)
 {
 	g->vertices->vertice->distancia = 1; // REMOVER
 	// BuscaLargura(G, v); // TODO
+	// v == r, k == v, vertice_atual == w
 
 	struct queue *fila = criaFila(g->num_vertices);
-	// v.pai = NULL
+
+	vertice v1;
+	v1 = cria_vertice((char*) "v1");
+
+	g->vertices->vertice->pai = NULL;
 	v->distancia = 0;
-	// v->estado = 1;
-	// coloca v com estado 1
-	enfileira(fila, v);
+	v->estado = 1;
+
+	// vertice vertice_atual = copiaVertice("vertice_atual", g->vertices->vertice);
+	// printf("%s %d\n", vertice_atual->nome, vertice_atual->estado);
+	
+	enfileira(fila, v1);
 
 	// enquanto a fila nao estiver vazia
 	while (!isEmpty(fila))
 	{
-		desemfileira(fila);
-		// 	para cada vizinho w de v:
-		// 		se estado de w for 1:
-		// 			processa vw -> aresta fora da arvore
-		// 		senao, se estado de w for 0
-		// 			processa w = w.pai.distancia+1
-		// 			processa vw -> aresta da arvore
-		// 			w.pai = v
-		// 			enfileira w
-		// 			w.estado = 1
-		// 	v.estado = 2
+		v1 = desemfileira(fila);
+		vertice vertice_atual = copiaVertice("vertice_atual", v1->vertices_conectados->vertice);
+		do
+		{
+			if (vertice_atual->estado == 1){
+				// printf("processa vw fora da arvore\n");
+			}
+			else if (vertice_atual->estado == 0){
+				// printf("processa vertice_atual\n");
+				vertice_atual->distancia = v1->distancia;
+				// printf("processa vvertice_atual aresta da arvore\n");
+				vertice_atual->pai = &v1;
+				enfileira(fila, vertice_atual);
+				vertice_atual->estado = 1;
+				printf("%d\n", vertice_atual->estado);
+			}
+		} while (vertice_atual != NULL);
+		v1->estado = 2;
 	}
+
+	return;
+	// 	para cada vizinho w de v:
+	// 		se estado de w for 1:
+	// 			processa vw -> aresta fora da arvore
+	// 		senao, se estado de w for 0
+	// 			processa w = w.pai.distancia+1
+	// 			processa vw -> aresta da arvore
+	// 			w.pai = v
+	// 			enfileira w
+	// 			w.estado = 1
+	// 	v.estado = 2
 }
 
-struct queue *criaFila(unsigned int capacity)
+
+struct queue *criaFila(unsigned long int capacity)
 {
 	struct queue *queue = (struct queue *)malloc(sizeof(struct queue));
 	queue->capacity = capacity;
 	queue->front = queue->size = 0;
 	queue->rear = capacity - 1;
-	queue->components = (int *)malloc(queue->capacity * sizeof(int));
+	queue->components = (vertice *)malloc(queue->capacity * sizeof(vertice));
 	return queue;
 }
 
@@ -375,7 +415,7 @@ int isEmpty(struct queue *queue)
 	return (queue->size == 0);
 }
 
-void enfileira(struct queue *queue, int item)
+void enfileira(struct queue *queue, vertice item)
 {
 	if (isFull(queue))
 		return;
@@ -383,30 +423,47 @@ void enfileira(struct queue *queue, int item)
 	queue->rear = (queue->rear + 1) % queue->capacity;
 	queue->components[queue->rear] = item;
 	queue->size = queue->size + 1;
-	;
+	return;
 }
 
-int desemfileira(struct queue *queue)
+vertice desemfileira(struct queue *queue)
 {
 	if (isEmpty(queue))
-		return -1;
+		return NULL;
 
-	int item = queue->components[queue->front];
+	vertice item = queue->components[queue->front];
 	queue->front = (queue->front + 1) % queue->capacity;
 	queue->size = queue->size - 1;
 	return item;
 }
 
-int rear(struct queue *queue)
+vertice rear(struct queue *queue)
 {
 	if (isEmpty(queue))
-		return -1;
+		return NULL;
 	return queue->components[queue->rear];
 }
 
-int front(struct queue *queue)
+vertice front(struct queue *queue)
 {
 	if (isEmpty(queue))
-		return -1;
+		return NULL;
 	return queue->components[queue->front];
+}
+
+vertice copiaVertice(const char *nome, vertice origem)
+{
+	vertice v = malloc(sizeof(struct vertice));
+
+	v->nome = malloc(strlen(nome) + 1);
+	strcpy(v->nome, nome);
+
+	v->id = 0;
+	v->distancia = origem->distancia;
+	v->grau = origem->grau;
+	v->estado = 0;
+	v->pai = NULL;
+	v->vertices_conectados = malloc(sizeof(struct node));
+	
+	return v;
 }
