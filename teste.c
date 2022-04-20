@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	{
 		g = le_grafo(stdin);
 	}
-
+	
 	v = le_vertice();
 	if (!g)
 		return 1;
