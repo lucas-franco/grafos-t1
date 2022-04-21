@@ -49,7 +49,7 @@ struct queue
 	unsigned long int front, rear;
 	unsigned long int size;
 	unsigned long int capacity;
-	struct node **components;
+	vertice *components;
 };
 
 /****************************** Funções adicionais *********************************/
@@ -408,8 +408,6 @@ void distancia_de_v(grafo g, vertice v)
 	
 	vertice v1 = v;
 	enfileira(fila, v1);
-
-	enfileira(fila, r);
 
 	while (!isEmpty(fila))
 	{
